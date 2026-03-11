@@ -1,0 +1,248 @@
+<div class="container">
+  <header class="flex justify-between items-center mb-12">
+    <div>
+      <h1 class="text-4xl font-bold tracking-tight text-white mb-2">Meeting Tracker</h1>
+      <p class="text-slate-400">Manage meeting notes and metadata seamlessly.</p>
+    </div>
+    <div class="glass-panel p-1 flex gap-2">
+      <button (click)="toggleView('form')" [class.active]="view() === 'form'" class="nav-btn">
+        <lucide-icon [name]="'FileText'" class="w-4 h-4"></lucide-icon>
+        Log Meeting
+      </button>
+      <button (click)="toggleView('dashboard')" [class.active]="view() === 'dashboard'" class="nav-btn">
+        <lucide-icon [name]="'LayoutDashboard'" class="w-4 h-4"></lucide-icon>
+        Dashboard
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Meeting Form View -->
+    <div *ngIf="view() === 'form'"
+      class="glass-panel p-8 max-w-2xl mx-auto shadow-2xl backdrop-blur-xl border border-white/10">
+      <h2 class="text-2xl font-semibold mb-8 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+          <lucide-icon [name]="'ClipboardList'" class="text-white w-5 h-5"></lucide-icon>
+        </div>
+        New Meeting Entry
+      </h2>
+
+      <form [formGroup]="meetingForm" (ngSubmit)="saveMeetingData()" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="form-group">
+            <label><lucide-icon [name]="'Users'" class="w-3 h-3 inline mr-1"></lucide-icon> User Name</label>
+            <input type="text" formControlName="userName" class="input-field" placeholder="Entry by...">
+            <div *ngIf="meetingForm.get('userName')?.touched && meetingForm.get('userName')?.invalid" class="error-msg">
+              Name is required</div>
+          </div>
+
+          <div class="form-group">
+            <label>Customer Selection</label>
+            <select formControlName="customerName" (change)="onCustomerChange($event)" class="input-field">
+              <option value="">Select a customer</option>
+              <option *ngFor="let c of customers()" [value]="c.name">{{c.name}}</option>
+              <option value="ADD_NEW" class="font-bold text-primary">+ Add New Customer</option>
+            </select>
+          </div>
+        </div>
+
+        <div *ngIf="showNewCustomerInput" class="form-group animate-slideDown">
+          <label class="text-primary">New Customer Name</label>
+          <div class="relative">
+            <input type="text" formControlName="newCustomerName" class="input-field border-primary/50"
+              placeholder="Enter corporate name...">
+            <lucide-icon [name]="'Plus'"
+              class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary"></lucide-icon>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Meeting Notes</label>
+          <textarea formControlName="meetingNotes" rows="5" class="input-field resize-none"
+            placeholder="Detailed notes about the discussion..."></textarea>
+          <div *ngIf="meetingForm.get('meetingNotes')?.touched && meetingForm.get('meetingNotes')?.invalid"
+            class="error-msg">Min 10 characters required</div>
+        </div>
+
+        <div class="bg-white/5 rounded-xl p-4 border border-white/5 text-xs text-slate-400 space-y-2">
+          <div class="flex items-center gap-2">
+            <lucide-icon [name]="'MapPin'" class="w-3 h-3 text-emerald-500"></lucide-icon>
+            GPS Coordinates will be captured automatically.
+          </div>
+          <div class="flex items-center gap-2">
+            <lucide-icon [name]="'Smartphone'" class="w-3 h-3 text-indigo-500"></lucide-icon>
+            Browser and Device signatures will be attached.
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="isSubmitting" class="btn-primary w-full justify-center py-4">
+          <span *ngIf="!isSubmitting">
+            <lucide-icon [name]="'Send'" class="w-5 h-5 mr-2 inline"></lucide-icon>
+            Finalize & Save Entry
+          </span>
+          <span *ngIf="isSubmitting" class="flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            Saving to Cloud...
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Dashboard View -->
+    <app-dashboard *ngIf="view() === 'dashboard'"></app-dashboard>
+  </main>
+</div>
+
+<style>
+  .nav-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #94a3b8;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .nav-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .items-center {
+    align-items: center;
+  }
+
+  .justify-between {
+    justify-content: space-between;
+  }
+
+  .mb-12 {
+    margin-bottom: 3rem;
+  }
+
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .text-4xl {
+    font-size: 2.25rem;
+  }
+
+  .font-bold {
+    font-weight: 700;
+  }
+
+  .gap-2 {
+    gap: 0.5rem;
+  }
+
+  .gap-3 {
+    gap: 0.75rem;
+  }
+
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .max-w-2xl {
+    max-width: 42rem;
+  }
+
+  .p-8 {
+    padding: 2rem;
+  }
+
+  .space-y-6>*+* {
+    margin-top: 1.5rem;
+  }
+
+  .grid {
+    display: grid;
+  }
+
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  @media (min-width: 768px) {
+    .md:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .gap-6 {
+    gap: 1.5rem;
+  }
+
+  .relative {
+    position: relative;
+  }
+
+  .absolute {
+    position: absolute;
+  }
+
+  .right-4 {
+    right: 1rem;
+  }
+
+  .top-1\/2 {
+    top: 50%;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .error-msg {
+    color: #f87171;
+    font-size: 0.75rem;
+    margin-top: 4px;
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
