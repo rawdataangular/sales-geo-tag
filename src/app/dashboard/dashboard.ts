@@ -68,6 +68,7 @@ import { Meeting, Customer } from '../models/meeting.model';
               <td class="p-4">
                 <div *ngIf="m.location; else noLocation" class="flex flex-col gap-0.5">
                   <span class="text-[10px] font-mono text-emerald-500">Lat: {{ m.location.latitude | number:'1.3-3' }}</span>
+                                   <span class="text-[10px] font-mono ">&nbsp; - &nbsp;</span>
                   <span class="text-[10px] font-mono text-indigo-400">Lng: {{ m.location.longitude | number:'1.3-3' }}</span>
                 </div>
                 <ng-template #noLocation><span class="text-xs text-muted italic">No GPS</span></ng-template>
